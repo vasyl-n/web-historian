@@ -6,32 +6,59 @@ var read = require('read-file-relative').read;
 // require more modules/folders here!
 
 var loading = './public/loading.html';
+var newAsset = '../archives/sites.txt';
 
 var readSitesTxt = function(req, res, newStr) {
-  var newAsset = '../archives/sites.txt';
   read(newAsset, 'utf8', function(err, data) {
-    console.log(data);
-    console.log(data.indexOf(newStr))
-    handleInputExist(res, data, newStr)
+    handleInputExist(res, data, newStr);
   });
 };
 
 exports.handlePost = function (req, res) {
   req.on('data', function(data) {
     var newStr = data.toString().split('=')[1];
-    console.log(newStr)
-    readSitesTxt(req, res, newStr)
+    console.log(newStr);
+    archive.readListOfUrls()
 
-    // if string is not in a file - serve loading html
-    // if string is is a file, but archive is not loaded yet - serve loading html
-    // if string is in a file and archive is loaded - serve archive
+    readSitesTxt(req, res, newStr);
   });
 };
 
 var handleInputExist = function(res, sites, input) {
+  var newFilePath = `../archives/sites/${input}`;
+  // Checks if sites.txt contains input string
   if (sites.indexOf(input) < 0) {
     httpHelpers.serveAssets(res, loading, (data) => {
       httpHelpers.sendResponse(res, data, 200);
-    })
+    });
+    writeSitesTxt(input)
   }
+
+  // Checks if html files exist
+  read(newFilePath, 'utf8', (err, data) => {
+    // Serve loading HTML
+    if (err) {
+      httpHelpers.serveAssets(res, loading, (data) => {
+        httpHelpers.sendResponse(res, data, 404);
+      });
+    } else {
+      httpHelpers.serveAssets(res, newFilePath, (data) => {
+        httpHelpers.sendResponse(res, data, 200);
+      });
+    }
+  })
 };
+
+var writeSitesTxt = function(newSiteName) {
+  var newPath = path.resolve(__dirname, `../archives/sites.txt`)
+  read(newAsset, 'utf8', function(err, data) {
+    data += '\n' + newSiteName;
+    fs.writeFile(newPath, data, (err) => {
+      if (err) {
+        console.log(' There was an error ', err)
+      }
+    })
+  });
+};
+
+

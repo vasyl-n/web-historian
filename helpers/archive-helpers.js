@@ -1,7 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-
+var read = require('read-file-relative').read;
+var htmlFetcher = require('../workers/htmlfetcher')
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -9,7 +10,7 @@ var _ = require('underscore');
  * customize it in any way you wish.
  */
 
-exports.paths = {
+var paths = {
   siteAssets: path.join(__dirname, '../web/public'),
   archivedSites: path.join(__dirname, '../archives/sites'),
   list: path.join(__dirname, '../archives/sites.txt')
@@ -24,18 +25,53 @@ exports.initialize = function(pathsObj) {
 
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
+var newPath = path.resolve(__dirname, `../archives/sites.txt`)
 
-exports.readListOfUrls = function(callback) {
+var readListOfUrls = function(callback) {
+  fs.readFile(paths.list, 'utf8', (err, data) => {
+    if(err) console.log(err);
+    // console.log(data, "<<<<<<< HERE in archive helpers")
+    callback(data)
+  })
 };
 
-exports.isUrlInList = function(url, callback) {
+var isUrlInList = function(url, callback) {
+  readListOfUrls( (data, url) => {
+    if ( data.indexOf(url) > -1 ) {
+      callback(true);
+    }
+    callback(false);
+  })
 };
 
-exports.addUrlToList = function(url, callback) {
+var addUrlToList = function(url, callback) {
+  isUrlInList(url, (isInList) => {
+    if ( !isInList ) {
+      readListOfUrls( (data) => {
+        fs.writeFile( paths.list, data, (err) => {
+          if ( err ) console.log(err);
+        });
+      });
+    }
+  });
 };
 
-exports.isUrlArchived = function(url, callback) {
+var isUrlArchived = function(url, callback) {
+  fs.readFile(`${paths.archivedSites}${url}`, 'utf8', (err, data) => {
+    if ( err ) {
+      callback(false);
+    } else {
+      callback(true);
+    }
+  });
 };
 
-exports.downloadUrls = function(urls) {
+var downloadUrls = function(urls) {
+  readListOfUrls( (data) => {
+    var arrayOfSites = data.split('\n');
+    arrayOfSites.forEach((site) => {
+      htmlFetcher(site);
+    });
+  });
 };
+

@@ -1,7 +1,7 @@
 var path = require('path');
 var fs = require('fs');
 var archive = require('../helpers/archive-helpers');
-var read = require('read-file-relative').read
+var read = require('read-file-relative').read;
 
 var asset = './public/index.html';
 var loading = './public/loading.html';
@@ -17,23 +17,23 @@ var headers = {
 
 exports.statusCode = 200;
 
- var serveAssets = function(res, asset, callback) {
+var serveAssets = function(res, asset, callback) {
   read(asset, 'utf8', function(err, data) {
     if (err) {
-      res.writeHead(404, headers)
-      console.log('There was an error ', err)
+      res.writeHead(404, headers);
+      console.log('There was an error ', err);
     } else {
       // res.writeHead(200, headers)
       callback(data);
     }
-  })
+  });
 };
 
 var sendResponse = function(res, data, statusCode) {
-  console.log(data, '<<< ++++++++++ is sendResponse data')
+  // console.log(data, '<<< ++++++++++ is sendResponse data');
   statusCode = statusCode || 200;
   res.writeHead(statusCode, headers);
-  res.end(data)
+  res.end(data);
 };
 
 exports.handleCss = function(req, res) {
