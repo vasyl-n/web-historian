@@ -12,20 +12,20 @@ var port = 8080;
 var ip = '127.0.0.1';
 
 let routes = {
-  '/': handler.handleHTML,
-  '/styles.css' : handler.handleCss,
+  '/': httpHelpers.handleHTML,
+  '/styles.css': httpHelpers.handleCss,
   '/archives': handler.handlePost
 };
 
 
-var server = http.createServer(function(req, res){
+var server = http.createServer(function(req, res) {
   var url = path.parse(req.url).pathname;
-  console.log(req.url , req.method, url)
+  console.log(req.url, req.method, url);
   var route = routes[url.pathname];
 
 
   var url = req.url;
-  routes[url] ? routes[url](req, res) : console.log('Error doesn\'t exist')
+  routes[url] ? routes[url](req, res) : console.log('Error doesn\'t exist');
 });
 
 if (module.parent) {
