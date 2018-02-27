@@ -17,9 +17,6 @@ var readSitesTxt = function(req, res, newStr) {
 exports.handlePost = function (req, res) {
   req.on('data', function(data) {
     var newStr = data.toString().split('=')[1];
-    console.log(newStr);
-    archive.readListOfUrls()
-
     readSitesTxt(req, res, newStr);
   });
 };

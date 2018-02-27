@@ -26,52 +26,49 @@ exports.initialize = function(pathsObj) {
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 var newPath = path.resolve(__dirname, `../archives/sites.txt`)
+exports.helpers = {
+  readListOfUrls: function(callback) {
+    fs.readFile(paths.list, 'utf8', (err, data) => {
+      if(err) console.log(err);
+      // console.log(data, "<<<<<<< HERE in archive helpers")
+      callback(data)
+    })
+  },
 
-var readListOfUrls = function(callback) {
-  fs.readFile(paths.list, 'utf8', (err, data) => {
-    if(err) console.log(err);
-    // console.log(data, "<<<<<<< HERE in archive helpers")
-    callback(data)
-  })
-};
-
-var isUrlInList = function(url, callback) {
-  readListOfUrls( (data, url) => {
-    if ( data.indexOf(url) > -1 ) {
-      callback(true);
-    }
-    callback(false);
-  })
-};
-
-var addUrlToList = function(url, callback) {
-  isUrlInList(url, (isInList) => {
-    if ( !isInList ) {
-      readListOfUrls( (data) => {
-        fs.writeFile( paths.list, data, (err) => {
-          if ( err ) console.log(err);
-        });
-      });
-    }
-  });
-};
-
-var isUrlArchived = function(url, callback) {
-  fs.readFile(`${paths.archivedSites}${url}`, 'utf8', (err, data) => {
-    if ( err ) {
+  isUrlInList: function(url, callback) {
+    readListOfUrls( (data, url) => {
+      if ( data.indexOf(url) > -1 ) {
+        callback(true);
+      }
       callback(false);
-    } else {
-      callback(true);
-    }
-  });
-};
+    })
+  },
 
-var downloadUrls = function(urls) {
-  readListOfUrls( (data) => {
-    var arrayOfSites = data.split('\n');
-    arrayOfSites.forEach((site) => {
-      htmlFetcher(site);
+  addUrlToList: function(url, callback) {
+    isUrlInList(url, (isInList) => {
+      if ( !isInList ) {
+        readListOfUrls( (data) => {
+          fs.writeFile( paths.list, data, (err) => {
+            if ( err ) console.log(err);
+          });
+        });
+      }
     });
-  });
-};
+  },
 
+  isUrlArchived: function(url, callback) {
+    fs.readFile(`${paths.archivedSites}/${url}`, 'utf8', (err, data) => {
+      if ( err ) {
+        callback(false);
+      } else {
+        callback(true);
+      }
+    });
+  },
+
+  writeContent: function(site, data) {
+    fs.writeFile(`${paths.archivedSites}/${site}`, data, (err) => {
+      if ( err ) console.log(err);
+    });
+  }
+}
